@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>F3 Marina Contact</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+    body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background: #f3f5f7;
+        margin: 0;
+        padding: 40px 20px;
+    }
+
+    .tabs {
+        display: flex;
+        justify-content: center;
+        max-width: 800px;
+        margin: auto;
+        margin-bottom: 0;
+        border-bottom: 2px solid #999;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 14px 20px;
+        text-align: center;
+        font-weight: bold;
+        background: linear-gradient(to right, #444, #aaa);
+        color: white;
+        cursor: pointer;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        margin-right: 2px;
+    }
+
+    .tab.active {
+        background: linear-gradient(to right, #333, #888);
+        box-shadow: inset 0 -4px 0 #ff4800;
+    }
+
+    form {
+        background: white;
+        padding: 30px 20px;
+        max-width: 800px;
+        margin: auto;
+        display: none;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 3px 20px rgba(0,0,0,0.08);
+    }
+
+    form.active {
+        display: block;
+    }
+
+    .row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .row input,
+    .row textarea {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .row input::placeholder,
+    .row textarea::placeholder {
+        color: #999;
+        font-style: italic;
+    }
+
+    button {
+        background: linear-gradient(to bottom, #c0392b, #e74c3c);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: linear-gradient(to bottom, #b03224, #d84336);
+    }
+    </style>
+
+</head>
+<body>
+
+  <div class="tabs">
+    <div class="tab active" data-target="general-form">GENERAL INFORMATION</div>
+    <div class="tab" data-target="dry-form">DRY STORAGE APPLICATION</div>
+  </div>
+
+  <!-- General Info Form -->
+  <form id="general-form" class="active">
+    <div class="row">
+      <input name="Name" placeholder="Name (Required)" required />
+      <input name="Phone" placeholder="Phone" />
+    </div>
+    <div class="row">
+      <input name="Email" placeholder="Email (Required)" required />
+      <input name="Subject" placeholder="Subject (Required)" required />
+    </div>
+    <div class="row">
+      <textarea name="Message" placeholder="Message (Required)" required></textarea>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <!-- Dry Storage Form -->
+  <form id="dry-form">
+    <div class="row">
+      <input name="First Name" placeholder="First Name (Required)" required />
+      <input name="Last Name" placeholder="Last Name" required />
+    </div>
+    <div class="row">
+      <input name="Phone" placeholder="Phone (Required)" required />
+      <input name="Email" placeholder="Email (Required)" required />
+    </div>
+    <div class="row">
+      <input name="LOA" placeholder="Boat Length (LOA)" />
+      <input name="Height" placeholder="Height" />
+    </div>
+    <div class="row">
+      <input name="Beam" placeholder="Beam" />
+      <input name="Manufacturer" placeholder="Manufacturer" />
+    </div>
+    <div class="row">
+      <input name="Model" placeholder="Model" />
+      <input name="Year" placeholder="Year" />
+    </div>
+    <div class="row">
+      <textarea name="Referral Source" placeholder="How did you learn about F3 Marina?"></textarea>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const forms = document.querySelectorAll('form');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        forms.forEach(f => f.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+
+    forms.forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((v, k) => data[k] = v);
+
+        const tab = form.id === 'general-form' ? 'General Information' : 'Dry Storage Application';
+
+        const res = await fetch('http://localhost:5000/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tab, data })
+        });
+
+        if (res.ok) {
+          alert('✅ Submitted successfully!');
+          form.reset();
+        } else {
+          alert('❌ Submission failed.');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
