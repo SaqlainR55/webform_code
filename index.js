@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: "Credentials.json",
+  keyFile: "/etc/secrets/Credentials.json",
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
