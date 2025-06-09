@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // 🔽 Serve static HTML
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const auth = new google.auth.GoogleAuth({
   keyFile: "/etc/secrets/Credentials.json",
