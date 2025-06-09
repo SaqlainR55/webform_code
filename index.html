@@ -169,7 +169,7 @@
 
         const tab = form.id === 'general-form' ? 'General Information' : 'Dry Storage Application';
 
-        const res = await fetch('http://localhost:5000/submit', {
+        const res = await fetch('https://webform-code.onrender.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tab, data })
