@@ -24,7 +24,6 @@ app.post("/submit", async (req, res) => {
   const client = await auth.getClient();
   const sheets = google.sheets({ version: "v4", auth: client });
 
-  // 🧠 Define exact header order per tab
   const headerMap = {
     "General Information": [
       "Timestamp",
@@ -51,17 +50,14 @@ app.post("/submit", async (req, res) => {
     ]
   };
 
-  // 🔁 Alias map to match frontend field names to backend headers
   const aliasMap = {
-    "Boat Length In Feet - LOA": "Boat Length (LOA)",
-    "How Did You Learn About F3 Marina Fort Lauderdale?": "How did you learn about F3 Marina?"
+    "Boat Length In Feet - LOA": "LOA",
+    "How Did You Learn About F3 Marina Fort Lauderdale?": "Referral Source"
   };
 
   try {
     const headers = headerMap[tab];
     if (!headers) return res.status(400).send("Unknown tab");
-
-    console.log("📥 Incoming data:", data);
 
     const row = headers.map(header => {
       if (header === "Timestamp") {
@@ -78,25 +74,18 @@ app.post("/submit", async (req, res) => {
       }
 
       if (header === "First Name" && tab === "General Information") {
-        const first = data["Name"]?.split(" ")[0] || "";
-        console.log(`🟩 First Name from "Name": ${first}`);
-        return first;
+        return data["Name"]?.split(" ")[0] || "";
       }
 
       if (header === "Last Name" && tab === "General Information") {
-        const last = data["Name"]?.split(" ").slice(1).join(" ") || "";
-        console.log(`🟦 Last Name from "Name": ${last}`);
-        return last;
+        return data["Name"]?.split(" ").slice(1).join(" ") || "";
       }
 
       const key = aliasMap[header] || header;
-      const value = data[key] || "";
-      console.log(`🟨 Mapping header "${header}" to key "${key}" → value: "${value}"`);
-      return value;
+      return data[key] || "";
     });
 
-    // Leave column A blank intentionally
-    const values = [[ "", ...row ]];
+    const values = [[ "", ...row ]]; // Leave column A empty
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
@@ -108,7 +97,6 @@ app.post("/submit", async (req, res) => {
 
     res.status(200).send({ success: true });
   } catch (err) {
-    console.error("❌ Error:", err);
     res.status(500).send("Internal Server Error");
   }
 });
