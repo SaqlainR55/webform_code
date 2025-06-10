@@ -82,7 +82,7 @@ app.post("/submit", async (req, res) => {
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
       range: `${tab}!A1`,
-      valueInputOption: "USER_ENTERED",
+      valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values },
     });
