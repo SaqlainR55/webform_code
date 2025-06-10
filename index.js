@@ -24,7 +24,7 @@ app.post("/submit", async (req, res) => {
   const client = await auth.getClient();
   const sheets = google.sheets({ version: "v4", auth: client });
 
-  // Define header mappings manually
+  // 🧠 Define exact header order per tab
   const headerMap = {
     "General Information": [
       "Timestamp",
@@ -51,11 +51,18 @@ app.post("/submit", async (req, res) => {
     ]
   };
 
+  // 🔁 Alias map to match frontend field names to backend headers
+  const aliasMap = {
+    "Boat Length In Feet - LOA": "Boat Length (LOA)",
+    "How Did You Learn About F3 Marina Fort Lauderdale?": "How did you learn about F3 Marina?"
+  };
+
   try {
     const headers = headerMap[tab];
     if (!headers) return res.status(400).send("Unknown tab");
 
     const row = headers.map(header => {
+      // ⏱ Timestamp in New York time
       if (header === "Timestamp") {
         return new Intl.DateTimeFormat('en-US', {
           timeZone: 'America/New_York',
@@ -69,6 +76,7 @@ app.post("/submit", async (req, res) => {
         }).format(new Date());
       }
 
+      // 👤 Special case: "Name" field in General Information
       if (header === "First Name" && tab === "General Information") {
         return data["Name"]?.split(" ")[0] || "";
       }
@@ -77,10 +85,12 @@ app.post("/submit", async (req, res) => {
         return data["Name"]?.split(" ").slice(1).join(" ") || "";
       }
 
-      return data[header] || "";
+      // 🔄 Use alias map to fetch correct value
+      return data[aliasMap[header] || header] || "";
     });
 
-    const values = [[ "", ...row ]]; // Shift right (start from column B)
+    // Leave column A blank intentionally
+    const values = [[ "", ...row ]];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
