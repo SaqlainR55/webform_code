@@ -61,8 +61,9 @@ app.post("/submit", async (req, res) => {
     const headers = headerMap[tab];
     if (!headers) return res.status(400).send("Unknown tab");
 
+    console.log("📥 Incoming data:", data);
+
     const row = headers.map(header => {
-      // ⏱ Timestamp in New York time
       if (header === "Timestamp") {
         return new Intl.DateTimeFormat('en-US', {
           timeZone: 'America/New_York',
@@ -76,24 +77,26 @@ app.post("/submit", async (req, res) => {
         }).format(new Date());
       }
 
-      // 👤 Special case: "Name" field in General Information
       if (header === "First Name" && tab === "General Information") {
-        return data["Name"]?.split(" ")[0] || "";
+        const first = data["Name"]?.split(" ")[0] || "";
+        console.log(`🟩 First Name from "Name": ${first}`);
+        return first;
       }
 
       if (header === "Last Name" && tab === "General Information") {
-        return data["Name"]?.split(" ").slice(1).join(" ") || "";
+        const last = data["Name"]?.split(" ").slice(1).join(" ") || "";
+        console.log(`🟦 Last Name from "Name": ${last}`);
+        return last;
       }
 
-      // 🔄 Use alias map to fetch correct value
-      return data[aliasMap[header] || header] || "";
+      const key = aliasMap[header] || header;
+      const value = data[key] || "";
+      console.log(`🟨 Mapping header "${header}" to key "${key}" → value: "${value}"`);
+      return value;
     });
 
     // Leave column A blank intentionally
-    const key = aliasMap[header] || header;
-    const value = data[key] || "";
-    console.log(`🟨 Mapping header "${header}" to key "${key}" → value: "${value}"`);
-    return value;
+    const values = [[ "", ...row ]];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
