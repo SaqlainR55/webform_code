@@ -3,6 +3,7 @@ const { google } = require("googleapis");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const { DateTime } = require("luxon");
 
 dotenv.config();
 const app = express();
@@ -61,16 +62,7 @@ app.post("/submit", async (req, res) => {
 
     const row = headers.map(header => {
       if (header === "Timestamp") {
-        return new Intl.DateTimeFormat('en-US', {
-          timeZone: 'America/New_York',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        }).format(new Date());
+        return DateTime.now().setZone("America/New_York").toJSDate();
       }
 
       if (header === "First Name" && tab === "General Information") {
