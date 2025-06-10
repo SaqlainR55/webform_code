@@ -28,7 +28,7 @@ app.post("/submit", async (req, res) => {
     const values = [[new Date().toLocaleString(), ...Object.values(data)]];
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: `${tab}!A1`,
+      range: `${tab}!B1`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values },
