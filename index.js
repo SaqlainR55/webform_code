@@ -90,7 +90,10 @@ app.post("/submit", async (req, res) => {
     });
 
     // Leave column A blank intentionally
-    const values = [[ "", ...row ]];
+    const key = aliasMap[header] || header;
+    const value = data[key] || "";
+    console.log(`🟨 Mapping header "${header}" to key "${key}" → value: "${value}"`);
+    return value;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
