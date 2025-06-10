@@ -25,10 +25,12 @@ app.post("/submit", async (req, res) => {
     const client = await auth.getClient();
     const sheets = google.sheets({ version: "v4", auth: client });
 
-    const values = [[new Date().toLocaleString(), ...Object.values(data)]];
+    // 👇 Pad one empty column for column A
+    const values = [[ "", new Date().toLocaleString(), ...Object.values(data) ]];
+
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: `${tab}!B1`,
+      range: `${tab}!A1`, // still use A1 so it appends to the first available row
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values },
@@ -40,6 +42,7 @@ app.post("/submit", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
