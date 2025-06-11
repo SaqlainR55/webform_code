@@ -47,7 +47,8 @@ app.post("/submit", async (req, res) => {
       "Manufacturer",
       "Model",
       "Year",
-      "How Did You Learn About F3 Marina Fort Lauderdale?"
+      "How Did You Learn About F3 Marina Fort Lauderdale?",
+      { "Lease Related": "Yes" }
     ]
   };
 
