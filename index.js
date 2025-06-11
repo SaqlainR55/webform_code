@@ -48,7 +48,7 @@ app.post("/submit", async (req, res) => {
       "Model",
       "Year",
       "How Did You Learn About F3 Marina Fort Lauderdale?",
-      { "Lease Related": "Yes" }
+      "Lease Related"
     ]
   };
 
@@ -72,6 +72,10 @@ app.post("/submit", async (req, res) => {
 
       if (header === "Last Name" && tab === "General Information") {
         return data["Name"]?.split(" ").slice(1).join(" ") || "";
+      }
+
+      if (header === "Lease Related" && tab === "Dry Storage Application") {
+        return "Yes";
       }
 
       const key = aliasMap[header] || header;
