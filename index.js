@@ -80,6 +80,7 @@ app.post("/submit", async (req, res) => {
 
     // 2) If General Information, run OpenAI to classify lease-related
     let leaseRelatedAnswer = "No";
+
 if (tab === "General Information") {
   const userMsg = data["Message"] || "";
 
@@ -101,6 +102,7 @@ if (tab === "General Information") {
         - renting a slip
         - availability for storing a boat
         - storing at marina
+        
         Then reply exactly with:
         { "lease_related": "Yes" }
         
@@ -115,14 +117,17 @@ if (tab === "General Information") {
   });
 
   const text = completion.choices[0].message.content;
-  console.log("[OpenAI Raw Response]", text); // optional: for debugging
+  console.log("[OpenAI Raw Response]", text);
 
   try {
     leaseRelatedAnswer = JSON.parse(text).lease_related || "No";
   } catch {
     leaseRelatedAnswer = /Yes/i.test(text) ? "Yes" : "No";
   }
+} else if (tab === "Dry Storage Application") {
+  leaseRelatedAnswer = "Yes"; // 🔒 always yes
 }
+
 
 
     // 3) Build the row array
