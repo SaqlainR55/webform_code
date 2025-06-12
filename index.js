@@ -85,14 +85,21 @@ app.post("/submit", async (req, res) => {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a form analysis assistant." },
-          { role: "user", content:
-`Given this single Message field, decide if it's related to leasing or dry-stack storage.
-Reply with a JSON object only:
-
-{ "lease_related": "Yes" or "No" }
-
-Message: "${userMsg}"`
+          {
+            role: "system",
+            content: `You are an assistant that tags inquiries as leasing-related or not.`
+          },
+          {
+            role: "user",
+            content: `If the following message contains **any** intent to inquire about boat storage, leasing, slip rental, dry stack storage, or space availability, return:
+          
+          { "lease_related": "Yes" }
+          
+          Otherwise return:
+          
+          { "lease_related": "No" }
+          
+          Message: "${userMsg}"`
           }
         ]
       });
