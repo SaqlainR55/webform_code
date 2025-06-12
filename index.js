@@ -80,37 +80,50 @@ app.post("/submit", async (req, res) => {
 
     // 2) If General Information, run OpenAI to classify lease-related
     let leaseRelatedAnswer = "No";
-    if (tab === "General Information") {
-      const userMsg = data["Message"] || "";
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: `You are an assistant that tags inquiries as leasing-related or not.`
-          },
-          {
-            role: "user",
-            content: `If the following message contains **any** intent to inquire about boat storage, leasing, slip rental, dry stack storage, or space availability, return:
-          
-          { "lease_related": "Yes" }
-          
-          Otherwise return:
-          
-          { "lease_related": "No" }
-          
-          Message: "${userMsg}"`
-          }
-        ]
-      });
-      const text = completion.choices[0].message.content;
-      // parse JSON safely
-      try {
-        leaseRelatedAnswer = JSON.parse(text).lease_related || "No";
-      } catch {
-        leaseRelatedAnswer = /Yes/i.test(text) ? "Yes" : "No";
+if (tab === "General Information") {
+  const userMsg = data["Message"] || "";
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: `You are an assistant that tags messages as leasing-related or not for a marina.`
+      },
+      {
+        role: "user",
+        content: `Ignore subject and consider only this Message field.
+
+        If the message shows any intent related to:
+        - dry stack storage
+        - boat storage
+        - leasing a space
+        - renting a slip
+        - availability for storing a boat
+        - storing at marina
+        Then reply exactly with:
+        { "lease_related": "Yes" }
+        
+        Otherwise reply with:
+        { "lease_related": "No" }
+        
+        Strictly output JSON only. Do not explain or add anything else.
+        
+        Message: "${userMsg}"`
       }
-    }
+    ]
+  });
+
+  const text = completion.choices[0].message.content;
+  console.log("[OpenAI Raw Response]", text); // optional: for debugging
+
+  try {
+    leaseRelatedAnswer = JSON.parse(text).lease_related || "No";
+  } catch {
+    leaseRelatedAnswer = /Yes/i.test(text) ? "Yes" : "No";
+  }
+}
+
 
     // 3) Build the row array
     const headers = headerMap[tab];
