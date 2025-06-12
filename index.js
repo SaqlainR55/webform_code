@@ -82,8 +82,8 @@ app.post("/submit", async (req, res) => {
     let leaseRelatedAnswer = "No";
     if (tab === "General Information") {
       const userMsg = data["Message"] || "";
-      const completion = await openai.createChatCompletion({
-        model: "gpt-4o-mini",
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
         messages: [
           { role: "system", content: "You are a form analysis assistant." },
           { role: "user", content:
@@ -96,7 +96,7 @@ Message: "${userMsg}"`
           }
         ]
       });
-      const text = completion.data.choices[0].message.content;
+      const text = completion.choices[0].message.content;
       // parse JSON safely
       try {
         leaseRelatedAnswer = JSON.parse(text).lease_related || "No";
