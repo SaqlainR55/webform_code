@@ -4,96 +4,114 @@
   <meta charset="UTF-8" />
   <title>F3 Marina Contact</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
+  <style>
     body {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        background: #f3f5f7;
-        margin: 0;
-        padding: 40px 20px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #f3f5f7;
+      margin: 0;
+      padding: 40px 20px;
     }
 
     .tabs {
-        display: flex;
-        justify-content: center;
-        max-width: 800px;
-        margin: auto;
-        margin-bottom: 0;
-        border-bottom: 2px solid #999;
+      display: flex;
+      justify-content: center;
+      max-width: 800px;
+      margin: auto;
+      margin-bottom: 0;
+      border-bottom: 2px solid #999;
     }
 
     .tab {
-        flex: 1;
-        padding: 14px 20px;
-        text-align: center;
-        font-weight: bold;
-        background: linear-gradient(to right, #444, #aaa);
-        color: white;
-        cursor: pointer;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-        margin-right: 2px;
+      flex: 1;
+      padding: 14px 20px;
+      text-align: center;
+      font-weight: bold;
+      background: linear-gradient(to right, #444, #aaa);
+      color: white;
+      cursor: pointer;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      margin-right: 2px;
     }
 
     .tab.active {
-        background: linear-gradient(to right, #333, #888);
-        box-shadow: inset 0 -4px 0 #ff4800;
+      background: linear-gradient(to right, #333, #888);
+      box-shadow: inset 0 -4px 0 #ff4800;
     }
 
     form {
-        background: white;
-        padding: 30px 20px;
-        max-width: 800px;
-        margin: auto;
-        display: none;
-        border-radius: 0 0 10px 10px;
-        box-shadow: 0 3px 20px rgba(0,0,0,0.08);
+      background: white;
+      padding: 30px 20px;
+      max-width: 800px;
+      margin: auto;
+      display: none;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 3px 20px rgba(0,0,0,0.08);
     }
 
     form.active {
-        display: block;
+      display: block;
     }
 
     .row {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
     .row input,
     .row textarea {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
     }
 
     .row input::placeholder,
     .row textarea::placeholder {
-        color: #999;
-        font-style: italic;
+      color: #999;
+      font-style: italic;
     }
 
     button {
-        background: linear-gradient(to bottom, #c0392b, #e74c3c);
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        font-weight: bold;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: background 0.3s ease;
-        margin-top: 10px;
+      background: linear-gradient(to bottom, #c0392b, #e74c3c);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.3s ease;
+      margin-top: 10px;
     }
 
     button:hover {
-        background: linear-gradient(to bottom, #b03224, #d84336);
+      background: linear-gradient(to bottom, #b03224, #d84336);
     }
-    </style>
 
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .overlay-box {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+      font-family: inherit;
+    }
+  </style>
 </head>
 <body>
 
@@ -146,6 +164,14 @@
     <button type="submit">Submit</button>
   </form>
 
+  <!-- Overlay -->
+  <div id="success-overlay" style="display: none;" class="overlay">
+    <div class="overlay-box">
+      <h2>Submitted Successfully!</h2>
+      <p>Thank you for your submission.<br>We will reach out shortly.</p>
+    </div>
+  </div>
+
   <script>
     const tabs = document.querySelectorAll('.tab');
     const forms = document.querySelectorAll('form');
@@ -163,26 +189,46 @@
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Submitting...';
+
         const formData = new FormData(form);
         const data = {};
         formData.forEach((v, k) => data[k] = v);
 
         const tab = form.id === 'general-form' ? 'General Information' : 'Dry Storage Application';
 
-        const res = await fetch('https://webform-code.onrender.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tab, data })
-        });
+        try {
+          const res = await fetch('https://webform-code.onrender.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tab, data })
+          });
 
-        if (res.ok) {
-          alert('✅ Submitted successfully!');
-          form.reset();
-        } else {
-          alert('❌ Submission failed.');
+          if (res.ok) {
+            form.reset();
+            showSuccessOverlay();
+          } else {
+            alert('❌ Submission failed.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('❌ Something went wrong.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Submit';
         }
       });
     });
+
+    function showSuccessOverlay() {
+      const overlay = document.getElementById('success-overlay');
+      overlay.style.display = 'flex';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 3000);
+    }
   </script>
 
 </body>
